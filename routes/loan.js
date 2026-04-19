@@ -40,7 +40,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       { funds },
       {
         timeout: 30000,
-      }
+      },
     );
 
     const ltv = ltvRes.data;
@@ -58,24 +58,23 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     res.json({ sessionId, investor, funds: ltv.funds, summary, ltv });
   } catch (error) {
-  console.error("FULL ERROR:", error);
-  console.error("RESPONSE DATA:", error?.response?.data);
-  console.error("MESSAGE:", error.message);
+    console.error("FULL ERROR:", error);
+    console.error("RESPONSE DATA:", error?.response?.data);
+    console.error("MESSAGE:", error.message);
 
-  if (error.code === "ECONNABORTED") {
-    return res.status(504).json({
+    if (error.code === "ECONNABORTED") {
+      return res.status(504).json({
+        success: false,
+        message: "Request timed out. Please try again.",
+      });
+    }
+
+    return res.status(500).json({
       success: false,
-      message: "Request timed out. Please try again.",
+      message:
+        error?.response?.data?.detail ||
+        "Something went wrong while processing your file.",
     });
-  }
-
-  return res.status(500).json({
-    success: false,
-    message:
-      error?.response?.data?.detail ||
-      "Something went wrong while processing your file.",
-  });
-}
   }
 });
 
