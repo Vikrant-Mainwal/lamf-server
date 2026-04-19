@@ -38,7 +38,6 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const ltvRes = await axios.post(
       `${process.env.PYTHON_SERVICE_URL}/calculate-ltv`,
       { funds },
-      { timeout: 10000 },
     );
 
     const ltv = ltvRes.data;
