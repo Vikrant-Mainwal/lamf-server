@@ -11,8 +11,6 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-const PYTHON = process.env.PYTHON_SERVICE_URL;
-
 const sessions = new Map();
 
 router.post("/upload", upload.single("file"), async (req, res) => {
@@ -27,14 +25,18 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       contentType: "application/pdf",
     });
 
-    const parseRes = await axios.post(`${PYTHON}/parse-cas`, formData, {
-      headers: formData.getHeaders(),
-      timeout: 30000,
-    });
+    const parseRes = await axios.post(
+      `${process.env.PYTHON_SERVICE_URL}/parse-cas`,
+      formData,
+      {
+        headers: formData.getHeaders(),
+        timeout: 30000,
+      },
+    );
 
     const { investor, funds, summary } = parseRes.data;
     const ltvRes = await axios.post(
-      `${PYTHON}/calculate-ltv`,
+      `${process.env.PYTHON_SERVICE_URL}/calculate-ltv`,
       { funds },
       { timeout: 10000 },
     );
@@ -54,12 +56,10 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     res.json({ sessionId, investor, funds: ltv.funds, summary, ltv });
   } catch (error) {
-    console.error("FULL ERROR:", error);
-    console.error("RESPONSE DATA:", error?.response?.data);
-    console.error("MESSAGE:", error.message);
-
+    console.error("Error processing file:", error);
     return res.status(500).json({
-      error: error?.response?.data || error.message,
+      success: false,
+      message: "Something went wrong while processing your file.",
     });
   }
 });
@@ -72,12 +72,10 @@ router.get("/session/:id", (req, res) => {
     }
     res.json(session);
   } catch (error) {
-    console.error("FULL ERROR:", error);
-    console.error("RESPONSE DATA:", error?.response?.data);
-    console.error("MESSAGE:", error.message);
-
+    console.error("Error fetching session:", error);
     return res.status(500).json({
-      error: error?.response?.data || error.message,
+      success: false,
+      message: "Something went wrong while processing your file.",
     });
   }
 });
