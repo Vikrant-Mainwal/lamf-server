@@ -38,6 +38,9 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     const ltvRes = await axios.post(
       `${process.env.PYTHON_SERVICE_URL}/calculate-ltv`,
       { funds },
+      {
+        timeout: 30000,
+      }
     );
 
     const ltv = ltvRes.data;
@@ -55,11 +58,24 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     res.json({ sessionId, investor, funds: ltv.funds, summary, ltv });
   } catch (error) {
-    console.error("Error processing file:", error);
-    return res.status(500).json({
+  console.error("FULL ERROR:", error);
+  console.error("RESPONSE DATA:", error?.response?.data);
+  console.error("MESSAGE:", error.message);
+
+  if (error.code === "ECONNABORTED") {
+    return res.status(504).json({
       success: false,
-      message: "Something went wrong while processing your file.",
+      message: "Request timed out. Please try again.",
     });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message:
+      error?.response?.data?.detail ||
+      "Something went wrong while processing your file.",
+  });
+}
   }
 });
 
