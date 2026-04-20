@@ -11,12 +11,13 @@ router.post("/", async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: "message require" });
     }
+    // console.log("Received message:", message);
     const response = await axios.post(
       `${process.env.PYTHON_SERVICE_URL}/chat`,
       { message, portfolio: portfolio || {}, history },
       { timeout: 3000 },
     );
-
+    // console.log("Response from Python service:", response.data);
     res.json({ reply: response.data.reply });
   } catch (error) {
     console.error("Error in chat route:", error);

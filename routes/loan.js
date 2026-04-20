@@ -18,7 +18,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "file require" });
     }
-
+    // console.log("Received file:", req.file.originalname, "size:", req.file.size);
     const formData = new FormData();
     formData.append("file", req.file.buffer, {
       filename: req.file.originalname,
