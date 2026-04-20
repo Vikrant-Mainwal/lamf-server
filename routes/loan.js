@@ -30,7 +30,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       formData,
       {
         headers: formData.getHeaders(),
-        timeout: 100000,
+        timeout: 180000,
       },
     );
 
@@ -39,7 +39,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       `${process.env.PYTHON_SERVICE_URL}/calculate-ltv`,
       { funds },
       {
-        timeout: 100000,
+        timeout: 180000,
       },
     );
 
